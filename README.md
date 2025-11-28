@@ -315,7 +315,7 @@ n++; pre+= $2; pos+= $3; diff+= ($3-$2);
 a[n]=$2; b[n]=$3; d[n]=($3-$2)
 }
 END{ 
-# median helper 
+median helper 
 function median(arr, n, i){asort(arr); return (n%2?arr[(n+1)/2]:(arr[n/2]+arr[n/2+1])/2)} 
 printf "COMMON nwin=%d mean_pre=%.6g mean_pos=%.6g mean_delta(pos-pre)=%.6g\n", n, pre/n, pos/n, diff/n; 
 printf "median_pre=%.6g median_pos=%.6g median_delta=%.6g\n", median(a,n), median(b,n), median(d,n);
@@ -339,6 +339,7 @@ printf "median_delta="; median delta_vals.txt
 
 # fraction of windows with smaller pi in the post:
 awk '{if($3<$2) c++} END{printf "frac(pos<pre)=%.3f (%d/%d)\n", c/NR, c, NR}' pi_common.tsv
+
 ------------------------------------------------------------------------------------------------
 # Calculating Runs of Homozigosity (ROH) via PLINK 
 
@@ -359,7 +360,7 @@ roh_all.nosex (warning of undefined sex)
 
 column -t roh_all.hom.indiv | less -S
 
-#Result: Everything zeroed out. No segment long enough with standard parameters was found - common in scaffold genomes (short contigs break long ROHs). It's not an error, it's that the thresholds are too high.
+	## Result: Everything zeroed out. No segment long enough with standard parameters was found - common in scaffold genomes (short contigs break long ROHs). It's not an error, it's that the thresholds are too high.
 
 # moderate set, no additional filters
 
@@ -377,7 +378,7 @@ plink --vcf chiroxiphia.snps.vcf.gz \
 --homozyg-window-threshold 0.05 \ 
 --out roh_mod 
 
-#Result: everything reset- 
+	## Result: everything reset- 
 
 # Permissive set (for short scaff): 
 plink --vcf chiroxiphia.snps.vcf.gz \ 
@@ -394,8 +395,7 @@ plink --vcf chiroxiphia.snps.vcf.gz \
 --homozyg-window-threshold 0.05\ 
 --out roh_relaxed 
 
-#Result: 
-#summary by group: 
+# summary by group: 
 # PRE (mfv*) 
 awk '$2 ~ /^mfv/ && NR>1 {n++; nroh+=$4; sroh+=$5} END{printf "PRE n=%d mean_nROH=%.2f mean_SROH(Mb)=%.3f\n", n, nroh/n, (sroh/1000)/n}' roh_relaxed.hom.indiv 
 
@@ -425,7 +425,7 @@ echo "POS unique IIDs:"; awk 'NR>1{print $2}' roh_pos.hom | sort -u | wc -l
 awk 'NR>1 && $NF!="IID"{print $NF}' pre.txt | sed '/^[[:space:]]*$/d' | sort -u > pre_iid.txt
 awk 'NR>1 && $NF!="IID"{print $NF}' pos.txt | sed '/^[[:space:]]*$/d' | sort -u > pos_iid.txt
 
-###Calculating FROH via console
+### Calculating FROH via console
 setwd("/home/cmarinho/Chiroxiphia_caudata_genome/hwe")
 library(dplyr); library(readr); library(stringr); library(tidyr)
 
@@ -511,8 +511,7 @@ w
 
 # Effect (Cliff's delta) — simple estimate
 cliffs_delta <- function(x, y){
-
-# Returns delta in [-1,1] 
+Returns delta in [-1,1] 
 sum(outer(x, y, FUN = function(a,b) sign(a-b))) / (length(x)*length(y))
 }
 delta <- with(df, cliffs_delta(FROH_total[group=="POS"], FROH_total[group=="PRE"]))
@@ -541,7 +540,7 @@ plink --vcf chiroxiphia.snps.vcf.gz \
 --homozyg-window-threshold 0.05 \
 --out roh_pos_8mb
 
-#Result: zero for all
+	## Result: zero for all
 
 # Running for size from 4mb
 plink --vcf chiroxiphia.snps.vcf.gz \ 
@@ -558,7 +557,8 @@ plink --vcf chiroxiphia.snps.vcf.gz \
 --homozyg-window-missing 5 \ 
 --homozyg-window-threshold 0.05 \ 
 --out roh_pos_4mb 
-#Result: zero for everyone
+
+	## Result: zero for everyone
 
 # Rotating to size a from 2mb
 plink --vcf chiroxiphia.snps.vcf.gz \ 
@@ -575,7 +575,8 @@ plink --vcf chiroxiphia.snps.vcf.gz \
 --homozyg-window-missing 5 \ 
 --homozyg-window-threshold 0.05 \ 
 --out roh_pos_2mbv2 
-#Zero
+
+	## Result: Zero
 
 # Running with relaxadp filter, 2mb and het=2
 plink --vcf chiroxiphia.snps.vcf.gz \ 
@@ -592,7 +593,8 @@ plink --vcf chiroxiphia.snps.vcf.gz \
 --homozyg-window-missing 5 \ 
 --homozyg-window-threshold 0.05 \ 
 --out roh_pos_2mb_het2_0810 
-#Result: zero
+
+	## Result: zero
 
 # Running with Het=2
 plink --vcf chiroxiphia.snps.vcf.gz \ 
@@ -609,9 +611,10 @@ plink --vcf chiroxiphia.snps.vcf.gz \
 --homozyg-window-missing 5 \ 
 --homozyg-window-threshold 0.05 \ 
 --out roh_pos_2mb_het2_08102 
-#Result: zero
 
-#The strategy now Use the Het=2 filter on all tracks and compare the FROH at 1 Mb and 500 kb between the "pre" and "post" groups.
+	##Result: zero
+
+	## The strategy now Use the Het=2 filter on all tracks and compare the FROH at 1 Mb and 500 kb between the "pre" and "post" groups.
 
 plink --vcf chiroxiphia.snps.vcf.gz \ 
 --allow-extra-chr --double-id \ 
@@ -627,7 +630,8 @@ plink --vcf chiroxiphia.snps.vcf.gz \
 --homozyg-window-missing 5 \ 
 --homozyg-window-threshold 0.05 \ 
 --out roh_pos_1mb_het2 
-#Result: 1.56mb for Mar051
+
+	## Result: 1.56mb for Mar051
 
 #Running for Pre
 plink --vcf chiroxiphia.snps.vcf.gz \ 
@@ -644,7 +648,8 @@ plink --vcf chiroxiphia.snps.vcf.gz \
 --homozyg-window-missing 5 \ 
 --homozyg-window-threshold 0.05 \ 
 --out roh_pre_1mb_het2 
-#Result: zero
+
+	## Result: zero
 
 #Running from 500kb for pre
 plink --vcf chiroxiphia.snps.vcf.gz \ 
@@ -661,7 +666,8 @@ plink --vcf chiroxiphia.snps.vcf.gz \
 --homozyg-window-missing 5 \ 
 --homozyg-window-threshold 0.05 \ 
 --out roh_pre_500kb_het2 
-#Result: 2.9mb for one of the samples- ancestral inbreeding
+
+	## Result: 2.9mb for one of the samples- ancestral inbreeding
 
 #running from 1mb to pre
 plink --vcf chiroxiphia.snps.vcf.gz \ 
@@ -678,7 +684,8 @@ plink --vcf chiroxiphia.snps.vcf.gz \
 --homozyg-window-missing 5 \ 
 --homozyg-window-threshold 0.05 \ 
 --out roh_pre_1mb_het2 
-#Result: zero
+
+	## Result: zero
 
 # Running the total FROH for the POST group using the filter Het=2
 plink --vcf chiroxiphia.snps.vcf.gz \ 
@@ -695,7 +702,9 @@ plink --vcf chiroxiphia.snps.vcf.gz \
 --homozyg-window-missing 5 \ 
 --homozyg-window-threshold 0.05 \ 
 --out roh_pos_total_het2 
-#Result: 1 ROH for Mar 051 (1,559mb) 
+
+	## Result: 1 ROH for Mar 051 (1,559mb) 
+
 # Running the total FROH for the pre group using the Het=2 filter 
 plink --vcf chiroxiphia.snps.vcf.gz \ 
 --allow-extra-chr --double-id \ 
@@ -710,7 +719,6 @@ plink --vcf chiroxiphia.snps.vcf.gz \
 --homozyg-window-het 2\ 
 --homozyg-window-missing 5 \
 --homozyg-window-threshold 0.05 \
-
 --out roh_pre_total_het2
 
 #Result: ALWAYS IN HOM.INDIV (2 ROH of 851.3kb for mfv4126, 1 of 376kb for mfv4127 and 11 of 5206kb for mfv4129.
@@ -718,15 +726,12 @@ plink --vcf chiroxiphia.snps.vcf.gz \
 # Generating SFS with Hardfilter via Angsd
 
 # Note: angsd is located in /home/cmarinho/angsd/angsd
-
 # Note: realSFS is located in angsd/misc/
 
 # Input files: bamlist_pre.txt and bamlist_pos.txt (located in /home/cmarinho/Chiroxiphia_caudata_genome/hwe/angsd_results)
 
 # 1) Generating SAF by group
-
 # 1.1. from the pre-accident group
-
 /home/cmarinho/angsd/angsd/angsd -b /home/cmarinho/Chiroxiphia_caudata_genome/hwe/angsd_results/bamlist_pre.txt \ 
 -ref "/home/cmarinho/chiroxiphia_refseq/GCF_009829145.1_bChiLan1.pri_genomic.fna" \ 
 - anc "/home/cmarinho/chiroxiphia_refseq/GCF_009829145.1_bChiLan1.pri_genomic.fna" 
@@ -749,13 +754,13 @@ plink --vcf chiroxiphia.snps.vcf.gz \
 -doSaf 1 
 
 # NOTE: 
-# -minMapQ 20 \ # ~ MQ<20 
-# -minQ 20\# base quality 
-# -GL 1 \ # likelihoods SAMtools; You can use -GL 2 (GATK) if you prefer
-# -minMaf 0.05 \ # MAF<0.05
-# -SNP_pval 1e-6 \ # restricts to SNPs (approx. of your -v snps)
-# -skipTriallelic 1 \ # biallelics (approx. -m2 -M2)
-# -minInd 1 # F_MISSING>0.5 ⇒ requires ≥50% present
+	# -minMapQ 20 \ # ~ MQ<20 
+	# -minQ 20\# base quality 
+	# -GL 1 \ # likelihoods SAMtools; You can use -GL 2 (GATK) if you prefer
+	# -minMaf 0.05 \ # MAF<0.05
+	# -SNP_pval 1e-6 \ # restricts to SNPs (approx. of your -v snps)
+	# -skipTriallelic 1 \ # biallelics (approx. -m2 -M2)
+	# -minInd 1 # F_MISSING>0.5 ⇒ requires ≥50% present
 
 # 1.2. from the post-accident group
 /home/cmarinho/angsd/angsd/angsd -b /home/cmarinho/Chiroxiphia_caudata_genome/hwe/angsd_results/bamlist_pos.txt \
@@ -779,7 +784,7 @@ plink --vcf chiroxiphia.snps.vcf.gz \
 -minInd 1 \
 -doSaf 1
 
-# ps.: It took around 5-6 hours per group
+	## ps.: It took around 5-6 hours per group
 
 # 2) Generating SFS per group
 /home/cmarinho/angsd/angsd/misc/realSFS pre.saf.idx -P 8 > pre.sfs
